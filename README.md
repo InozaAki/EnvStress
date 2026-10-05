@@ -53,9 +53,7 @@ I'll be using both Android Studio and Gradle to compile and run the projects. Yo
 
 2. **Open Android Studio and select "Open an existing project." Navigate to the cloned repository and open it.**
 
-3. **Select the desired Hands-on project from the folder structure in Android Studio.**
-
-4. **Click on the "Run" button (green play icon) in Android Studio to build and run the project on an emulator or a connected Android device.**
+3. **Click on the "Run" button (green play icon) in Android Studio to build and run the project on an emulator or a connected Android device.**
 
 ### Without Android Studio
 
@@ -63,7 +61,7 @@ I'll be using both Android Studio and Gradle to compile and run the projects. Yo
    ```bash
    git clone https://github.com/InozaAki/EnvStress.git
    ```
-2. **Navigate to the desired Hands-on project directory in the terminal.**
+2. **Navigate to the project directory in the terminal.**
 3. **Enable developer mode and USB debugging on your Android device.** (Used to save resources and time, but you can also use an emulator if you prefer.)
 4. **Use Gradle to build and run the project on your connected Android device. You can use the following command:**
 
