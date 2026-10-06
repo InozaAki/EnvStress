@@ -1,3 +1,4 @@
 <resources>
-    <string name="app_name">Template</string>
+    <string name="app_name">EnvStress</string>
+    <string name="splash_icon">Calmness image\n</string>
 </resources>

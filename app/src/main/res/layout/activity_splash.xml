@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#EDF6F9">
+
+    <ImageView
+        android:id="@+id/pulse_indicator"
+        android:layout_width="247dp"
+        android:layout_height="215dp"
+        android:layout_marginStart="83dp"
+        android:layout_marginEnd="82dp"
+        android:layout_marginBottom="189dp"
+        android:contentDescription="@string/splash_icon"
+        android:src="@drawable/circle"
+        android:tint="#DEE2FF"
+        app:layout_constraintBottom_toTopOf="@+id/phrase"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:ignore="ImageContrastCheck" />
+
+    <TextView
+        android:id="@+id/phrase"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="32dp"
+        android:layout_marginEnd="32dp"
+        android:fontFamily="sans-serif-condensed"
+        android:letterSpacing="0.05"
+        android:textAlignment="center"
+        android:textColor="#4A5568"
+        android:textSize="22sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/pulse_indicator" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
