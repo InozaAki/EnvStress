@@ -1,0 +1,6 @@
+{
+    "java.project.referencedLibraries": [
+        "lib/**/*.jar",
+        "/home/axelespinosa/Downloads/sound/library/sound.jar"
+    ]
+}
