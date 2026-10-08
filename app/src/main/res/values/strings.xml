@@ -1,4 +1,8 @@
 <resources>
     <string name="app_name">EnvStress</string>
     <string name="splash_icon">Calmness image\n</string>
+
+    <string name="greeting_text">Para comenzar, presiona el botón de grabación.</string>
+
+    <string name="record_button">Botón de grabación de sonido\n</string>
 </resources>

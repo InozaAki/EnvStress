@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#EDF6F9">
+    android:background="@color/background_primary">
 
     <ImageView
         android:id="@+id/pulse_indicator"
@@ -15,7 +15,7 @@
         android:layout_marginBottom="189dp"
         android:contentDescription="@string/splash_icon"
         android:src="@drawable/circle"
-        android:tint="#DEE2FF"
+        android:tint="#A483C5BE"
         app:layout_constraintBottom_toTopOf="@+id/phrase"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -31,7 +31,7 @@
         android:fontFamily="sans-serif-condensed"
         android:letterSpacing="0.05"
         android:textAlignment="center"
-        android:textColor="#4A5568"
+        android:textColor="@color/text_primary"
         android:textSize="22sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
