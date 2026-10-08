@@ -9,11 +9,14 @@ import javax.sound.sampled.AudioSystem;
 
 public class AudioCapture {
 
-    public AudioCapture() {}
+    public AudioCapture() {
+    }
 
-    private final String FILE_PATH = System.getenv("AUDIO_FILE_PATH") != null ? System.getenv("AUDIO_FILE_PATH") : "/home/axelespinosa/College/EnvStress/native-processing/utils/";
-    private static final int CHUNK_SIZE = 30;
-    
+    private final String FILE_PATH = System.getenv("AUDIO_FILE_PATH") != null ? System.getenv("AUDIO_FILE_PATH")
+            : "/home/axelespinosa/College/EnvStress/native-processing/utils/";
+    private static final int DESIRED_SAMPLE_RATE = 2048;
+    private static int chunkCounter = 0;
+
     private AudioInputStream[] audioInput;
 
     public void init() {
@@ -34,11 +37,11 @@ public class AudioCapture {
 
         audioInput = new AudioInputStream[files.length];
 
-        for (File file : files) {
+        for (int i = 0; i < files.length; i++) {
             try {
-                audioInput[0] = AudioSystem.getAudioInputStream(file);
+                audioInput[i] = AudioSystem.getAudioInputStream(files[i]);
             } catch (Exception e) {
-                throw new RuntimeException("Error reading audio file: " + file.getName(), e);
+                throw new RuntimeException("Error reading audio file: " + files[i].getName(), e);
             }
         }
 
@@ -49,20 +52,17 @@ public class AudioCapture {
 
     private static void processAudioInChunks(AudioInputStream audioInputStream) {
         AudioFormat format = audioInputStream.getFormat();
-        
+
         int frameSize = format.getFrameSize();
         float sampleRate = format.getSampleRate();
 
-        int bytesPerMillisecond = (int) ( (sampleRate * frameSize) / 1000);
-        int chunkSize = bytesPerMillisecond * CHUNK_SIZE;
-
-        chunkSize = (chunkSize / frameSize) * frameSize;
+        int chunkSize = (int) (DESIRED_SAMPLE_RATE * frameSize);
 
         byte[] buffer = new byte[chunkSize];
         int bytesRead;
 
-        try{
-            while((bytesRead = audioInputStream.read(buffer)) != -1) {
+        try {
+            while ((bytesRead = audioInputStream.read(buffer)) != -1) {
                 byte[] actualChunk = (bytesRead == chunkSize) ? buffer : Arrays.copyOf(buffer, bytesRead);
                 handleChunk(actualChunk, (int) sampleRate);
             }
@@ -70,7 +70,10 @@ public class AudioCapture {
             throw new RuntimeException("Error processing audio stream", e);
         }
 
+        AudioProcessing.writeEndOfProcessing("output.txt");
+
     }
+
 
     private static void handleChunk(byte[] chunk, int sampleRate) {
         int numSamples = chunk.length / 2;
@@ -90,30 +93,33 @@ public class AudioCapture {
         double[] fftInput = new double[fftSize];
         System.arraycopy(floatChunk, 0, fftInput, 0, numSamples);
         
-        AudioProcessing.analyzeAudioChunk(fftInput, sampleRate);
+        AudioProcessing.analyzeAudioChunk(fftInput, sampleRate, "output.txt", chunkCounter++);
     }
 
     /*
+     * 
+     * Class AudioCapture (CASI LISTO)
+     * 
+     * 1. Llega audio, o metemos audio. Llega en bytes.
+     * 2. Transformamos los bytes en un arreglo de flotantes que representan las
+     * ondas del audio
+     * 3. Ahora ese audio lo dividimos en tramas de 20 a 30 milisegundos.
+     * 
+     * Class AudioProcessing (CASI LISTO)
+     * 
+     * 4. Todas esas tramas se las metemos al algoritmo de FFT (siempre a una
+     * potencia de 2)
+     * 5. FFT nos regresa la amplitud de la frecuencia en ese milisegundo en
+     * especifico
+     * 
+     * TODO: Class AudioAnalysis
+     * 
+     * 6. Determinamos y categorizamos las frecuencias
+     * 7. Checamos cuales frecuencias tienen mayor amplitud y comparamos.
+     * 8. Cuando ya tenemos categorizadas las frecuencias por amplitud podemos dar
+     * un veredicto de, juntando estas tramas de audio podemos concluir X.
+     * 
+     * 
+     */
 
-    Class AudioCapture (CASI LISTO)
-
-    1. Llega audio, o metemos audio. Llega en bytes.
-    2. Transformamos los bytes en un arreglo de flotantes que representan las ondas del audio
-    3. Ahora ese audio lo dividimos en tramas de 20 a 30 milisegundos.
-
-    Class AudioProcessing (CASI LISTO)
-
-    4. Todas esas tramas se las metemos al algoritmo de FFT (siempre a una potencia de 2)
-    5. FFT nos regresa la amplitud de la frecuencia en ese milisegundo en especifico
-    
-    TODO: Class AudioAnalysis
-    
-    6. Determinamos y categorizamos las frecuencias
-    7. Checamos cuales frecuencias tienen mayor amplitud y comparamos.
-    8. Cuando ya tenemos categorizadas las frecuencias por amplitud podemos dar un veredicto de, juntando estas tramas de audio podemos concluir X.
-        
-    
-    */
-    
-    
 }

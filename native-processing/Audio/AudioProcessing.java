@@ -1,27 +1,90 @@
 package Audio;
 
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.Arrays;
 
 public class AudioProcessing {
 
-    public static void analyzeAudioChunk(double[] audioChunk, int sampleRate) {
-        System.out.println("Analyzing audio chunk of size: " + audioChunk.length + " at sample rate: " + sampleRate);
+    private static final double MIN_F0 = 80.0;
+    private static final double MAX_F0 = 300.0;
+    private static final double MIN_SPECTRUM_FREQ = 80.0;
+    private static final double MAX_SPECTRUM_FREQ = 4000.0;
+
+    private static final double SILENCE_THRESHOLD = 1.0; 
+
+    public static void analyzeAudioChunk(double[] audioChunk, int sampleRate, String outputFile, int chunkIndex) {
         double[] fftResult = computeFFT(audioChunk);
-        printFFTInfo(fftResult, sampleRate);
+        
+        int fftSize = fftResult.length * 2;
+        double maxMagnitude = 0.0;
+
+        for (int i = 1; i < fftResult.length; i++) {
+            double frequency = indexToFrequency(i, sampleRate, fftSize);
+            if (frequency >= MIN_SPECTRUM_FREQ && frequency <= MAX_SPECTRUM_FREQ) {
+                maxMagnitude = Math.max(maxMagnitude, fftResult[i]);
+            }
+        }
+
+        double timeInSeconds = (chunkIndex * (double) audioChunk.length) / sampleRate;
+
+        if (chunkIndex == 0) {
+            writeHeaders(outputFile);
+        }
+
+        try (PrintWriter writer = new PrintWriter(new FileWriter(outputFile, true))) {
+            if (maxMagnitude < SILENCE_THRESHOLD) {
+                writer.printf("%.3f\t%.2f\t%.4f\t%s%n", timeInSeconds, 0.0, maxMagnitude, "Silencio");
+                System.out.printf("[%.3fs] Silencio detectado (Mag: %.4f)%n", timeInSeconds, maxMagnitude);
+            } else {
+                double f0 = searchFundamentalFrequency(fftResult, sampleRate);
+                writer.printf("%.3f\t%.2f\t%.4f\t%s%n", timeInSeconds, f0, maxMagnitude, "Voz Activa");
+                System.out.printf("[%.3fs] Voz Activa -> F0: %6.2f Hz | Mag: %.4f%n", timeInSeconds, f0, maxMagnitude);
+            }
+        } catch (IOException e) {
+            System.err.println("Error escribiendo el archivo: " + e.getMessage());
+        }
+    }
+ 
+    private static void writeHeaders(String outputFile) {
+        try (PrintWriter writer = new PrintWriter(new FileWriter(outputFile, true))) {
+            writer.println("\n==========================================");
+            writer.println("Tiempo(s)\tF0(Hz)\tMagnitudMax\tEstado");
+            writer.println("==========================================");
+        } catch (IOException e) {
+            System.err.println("Error escribiendo encabezados: " + e.getMessage());
+        }
+    }
+
+    public static void writeEndOfProcessing(String outputFile) {
+        try (PrintWriter writer = new PrintWriter(new FileWriter(outputFile, true))) {
+            writer.println("==========================================");
+            writer.println("Fin del procesamiento de audio");
+            writer.println("==========================================");
+        } catch (IOException e) {
+            System.err.println("Error escribiendo el final del archivo: " + e.getMessage());
+        }
     }
 
     private static double[] computeFFT(double[] input) {
         int n = input.length;
+        if ((n & (n - 1)) != 0) throw new IllegalArgumentException("Input length must be a power of 2");
+
         double[] real = Arrays.copyOf(input, n);
         double[] imag = new double[n];
-
         int levels = 31 - Integer.numberOfLeadingZeros(n);
+
         for (int i = 0; i < n; i++) {
             int j = Integer.reverse(i) >>> (32 - levels);
             if (j > i) {
-                double tmpR = real[i];
+                double tempR = real[i];
                 real[i] = real[j];
-                real[j] = tmpR;
+                real[j] = tempR;
+
+                double tempI = imag[i];
+                imag[i] = imag[j];
+                imag[j] = tempI;
             }
         }
 
@@ -37,10 +100,10 @@ public class AudioProcessing {
                 for (int j = 0; j < half; j++) {
                     int even = i + j;
                     int odd = i + j + half;
-                    double rOdd = real[odd];
-                    double iOdd = imag[odd];
-                    double tR = rOdd * wR - iOdd * wI;
-                    double tI = rOdd * wI + iOdd * wR;
+
+                    double tR = real[odd] * wR - imag[odd] * wI;
+                    double tI = real[odd] * wI + imag[odd] * wR;
+
                     real[odd] = real[even] - tR;
                     imag[odd] = imag[even] - tI;
                     real[even] += tR;
@@ -60,18 +123,36 @@ public class AudioProcessing {
         return mags;
     }
 
-    private static void printFFTInfo(double[] fftResult, int sampleRate) {
-        for (float frequency : new float[]{1000, 2000, 3000}) {
-            float index = frecuencyToIndex(frequency, sampleRate, fftResult.length * 2);
-            if (index < fftResult.length) {
-                System.out.println("Magnitude at " + frequency + " Hz: " + fftResult[(int) index]);
-            } else {
-                System.out.println("Frequency " + frequency + " Hz is out of FFT range.");
+    private static double searchFundamentalFrequency(double[] fftResult, int sampleRate) {
+        int fftSize = fftResult.length * 2;
+        int minIndex = Math.max(frequencyToIndex(MIN_F0, sampleRate, fftSize), 1);
+        int maxIndex = Math.min(frequencyToIndex(MAX_F0, sampleRate, fftSize), fftResult.length - 1);
+
+        double maxMagnitude = 0.0;
+        int fundamentalIndex = -1;
+
+        for (int i = minIndex; i <= maxIndex; i++) {
+            if (fftResult[i] > maxMagnitude) {
+                maxMagnitude = fftResult[i];
+                fundamentalIndex = i;
             }
         }
+
+        if (fundamentalIndex == -1) {
+            System.out.println("F0: No encontrada");
+            return 0.0;
+        }
+
+        double fundamentalFrequency = indexToFrequency(fundamentalIndex, sampleRate, fftSize);
+        System.out.printf("F0: %.2f Hz | FFT bin: %d | Magnitude: %.4f%n", fundamentalFrequency, fundamentalIndex, maxMagnitude);
+        return fundamentalFrequency;
     }
 
-    private static float frecuencyToIndex(float frequency, int sampleRate, int chunkSize) {
-        return (frequency / sampleRate) * chunkSize;
+    private static double indexToFrequency(int index, int sampleRate, int fftSize) {
+        return (double) index * sampleRate / fftSize;
+    }
+
+    private static int frequencyToIndex(double frequency, int sampleRate, int fftSize) {
+        return (int) Math.round(frequency * fftSize / sampleRate);
     }
 }

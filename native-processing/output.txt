@@ -1,0 +1,184 @@
+
+==========================================
+Tiempo(s)	F0(Hz)	MagnitudMax	Estado
+==========================================
+0.000	0.00	0.0005	Silencio
+0.043	0.00	0.0002	Silencio
+0.085	0.00	0.0007	Silencio
+0.128	0.00	0.0017	Silencio
+0.171	0.00	0.0296	Silencio
+0.213	0.00	0.0012	Silencio
+0.256	0.00	0.0002	Silencio
+0.299	0.00	0.0000	Silencio
+0.341	0.00	0.0001	Silencio
+0.384	0.00	0.0000	Silencio
+0.427	0.00	0.0000	Silencio
+0.469	0.00	0.0000	Silencio
+0.512	0.00	0.0001	Silencio
+0.555	0.00	0.0000	Silencio
+0.597	0.00	0.0081	Silencio
+0.640	0.00	0.0050	Silencio
+0.683	0.00	0.0874	Silencio
+0.725	0.00	0.5551	Silencio
+0.768	164.06	1.5740	Voz Activa
+0.811	210.94	3.3876	Voz Activa
+0.853	257.81	2.0133	Voz Activa
+0.896	0.00	0.5741	Silencio
+0.939	0.00	0.0895	Silencio
+0.981	70.31	1.3823	Voz Activa
+1.024	140.63	4.2095	Voz Activa
+1.067	210.94	6.5023	Voz Activa
+1.109	304.69	9.1818	Voz Activa
+1.152	304.69	20.4320	Voz Activa
+1.195	304.69	13.8317	Voz Activa
+1.237	304.69	3.5380	Voz Activa
+1.280	304.69	7.4311	Voz Activa
+1.323	304.69	20.1990	Voz Activa
+1.365	304.69	16.8305	Voz Activa
+1.408	304.69	3.3884	Voz Activa
+1.451	304.69	1.7975	Voz Activa
+1.493	281.25	1.2081	Voz Activa
+1.536	257.81	1.5647	Voz Activa
+1.579	257.81	1.6310	Voz Activa
+1.621	281.25	38.9952	Voz Activa
+1.664	257.81	73.6629	Voz Activa
+1.707	257.81	25.5302	Voz Activa
+1.749	257.81	6.1033	Voz Activa
+1.792	257.81	4.6844	Voz Activa
+1.835	257.81	15.5205	Voz Activa
+1.877	257.81	18.6840	Voz Activa
+1.920	257.81	12.8676	Voz Activa
+1.963	234.38	11.8528	Voz Activa
+2.005	234.38	24.8359	Voz Activa
+2.048	234.38	7.6575	Voz Activa
+2.091	187.50	4.0710	Voz Activa
+2.133	210.94	15.4230	Voz Activa
+2.176	187.50	6.0160	Voz Activa
+2.219	164.06	1.5338	Voz Activa
+2.261	210.94	9.7453	Voz Activa
+2.304	210.94	12.4738	Voz Activa
+2.347	187.50	18.5991	Voz Activa
+2.389	187.50	16.2715	Voz Activa
+2.432	164.06	9.5702	Voz Activa
+2.475	304.69	6.8580	Voz Activa
+2.517	164.06	3.4930	Voz Activa
+2.560	164.06	3.1783	Voz Activa
+2.603	210.94	2.2256	Voz Activa
+2.645	0.00	0.7085	Silencio
+2.688	0.00	0.2275	Silencio
+2.731	0.00	0.0701	Silencio
+2.773	0.00	0.0314	Silencio
+2.816	0.00	0.0236	Silencio
+2.859	0.00	0.0233	Silencio
+2.901	0.00	0.0282	Silencio
+2.944	0.00	0.0220	Silencio
+2.987	0.00	0.0114	Silencio
+3.029	0.00	0.0146	Silencio
+3.072	0.00	0.0189	Silencio
+3.115	0.00	0.0062	Silencio
+3.157	0.00	0.0138	Silencio
+3.200	0.00	0.0143	Silencio
+3.243	0.00	0.0109	Silencio
+3.285	0.00	0.0103	Silencio
+3.328	0.00	0.0055	Silencio
+3.371	0.00	0.0203	Silencio
+3.413	0.00	0.0106	Silencio
+3.456	0.00	0.0114	Silencio
+3.499	0.00	0.0144	Silencio
+3.541	0.00	0.0092	Silencio
+3.584	0.00	0.0092	Silencio
+3.627	0.00	0.0057	Silencio
+0.115	0.00	0.0005	Silencio
+==========================================
+Fin del procesamiento de audio
+==========================================
+3.712	0.00	0.0012	Silencio
+3.755	0.00	0.0013	Silencio
+3.797	0.00	0.0003	Silencio
+3.840	0.00	0.0007	Silencio
+3.883	0.00	0.0016	Silencio
+3.925	0.00	0.0006	Silencio
+3.968	0.00	0.0000	Silencio
+4.011	0.00	0.0001	Silencio
+4.053	0.00	0.0000	Silencio
+4.096	0.00	0.0000	Silencio
+4.139	0.00	0.0000	Silencio
+4.181	0.00	0.0000	Silencio
+4.224	0.00	0.0004	Silencio
+4.267	0.00	0.0006	Silencio
+4.309	0.00	0.0027	Silencio
+4.352	0.00	0.0444	Silencio
+4.395	0.00	0.0182	Silencio
+4.437	0.00	0.0022	Silencio
+4.480	0.00	0.0012	Silencio
+4.523	0.00	0.0012	Silencio
+4.565	0.00	0.0093	Silencio
+4.608	0.00	0.0026	Silencio
+4.651	0.00	0.0086	Silencio
+4.693	0.00	0.3253	Silencio
+4.736	0.00	0.8312	Silencio
+4.779	304.69	8.8243	Voz Activa
+4.821	304.69	16.5796	Voz Activa
+4.864	304.69	10.2141	Voz Activa
+4.907	304.69	3.9138	Voz Activa
+4.949	0.00	0.9861	Silencio
+4.992	281.25	8.3414	Voz Activa
+5.035	304.69	21.6633	Voz Activa
+5.077	304.69	28.0883	Voz Activa
+5.120	70.31	3.9091	Voz Activa
+5.163	70.31	1.9815	Voz Activa
+5.205	257.81	4.2792	Voz Activa
+5.248	234.38	15.4054	Voz Activa
+5.291	210.94	34.6723	Voz Activa
+5.333	234.38	10.5400	Voz Activa
+5.376	234.38	6.4539	Voz Activa
+5.419	234.38	1.5921	Voz Activa
+5.461	257.81	3.4162	Voz Activa
+5.504	234.38	13.2696	Voz Activa
+5.547	234.38	12.1082	Voz Activa
+5.589	234.38	11.4671	Voz Activa
+5.632	234.38	14.1552	Voz Activa
+5.675	234.38	8.8694	Voz Activa
+5.717	210.94	13.0849	Voz Activa
+5.760	210.94	20.0170	Voz Activa
+5.803	210.94	14.5866	Voz Activa
+5.845	210.94	10.5635	Voz Activa
+5.888	187.50	3.5650	Voz Activa
+5.931	210.94	13.7583	Voz Activa
+5.973	187.50	5.2738	Voz Activa
+6.016	0.00	0.6450	Silencio
+6.059	187.50	5.5062	Voz Activa
+6.101	164.06	4.2565	Voz Activa
+6.144	187.50	2.9267	Voz Activa
+6.187	164.06	2.8390	Voz Activa
+6.229	117.19	3.7711	Voz Activa
+6.272	187.50	4.2941	Voz Activa
+6.315	187.50	3.4124	Voz Activa
+6.357	187.50	3.1890	Voz Activa
+6.400	0.00	0.7219	Silencio
+6.443	0.00	0.1179	Silencio
+6.485	0.00	0.0286	Silencio
+6.528	0.00	0.0440	Silencio
+6.571	0.00	0.0310	Silencio
+6.613	0.00	0.0157	Silencio
+6.656	0.00	0.0133	Silencio
+6.699	0.00	0.0141	Silencio
+6.741	0.00	0.0136	Silencio
+6.784	0.00	0.0068	Silencio
+6.827	0.00	0.0059	Silencio
+6.869	0.00	0.0108	Silencio
+6.912	0.00	0.0166	Silencio
+6.955	0.00	0.0128	Silencio
+6.997	0.00	0.0068	Silencio
+7.040	0.00	0.0087	Silencio
+7.083	0.00	0.0094	Silencio
+7.125	0.00	0.0064	Silencio
+7.168	0.00	0.0080	Silencio
+7.211	0.00	0.0058	Silencio
+7.253	0.00	0.0070	Silencio
+7.296	0.00	0.0097	Silencio
+7.339	0.00	0.0091	Silencio
+7.381	0.00	0.0060	Silencio
+==========================================
+Fin del procesamiento de audio
+==========================================
