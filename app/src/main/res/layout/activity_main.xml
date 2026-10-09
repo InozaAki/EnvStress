@@ -54,23 +54,19 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <ImageButton
-        android:id="@+id/recordButton"
-        android:layout_width="89dp"
-        android:layout_height="89dp"
-        android:layout_marginStart="108dp"
-        android:layout_marginTop="356dp"
-        android:layout_marginEnd="108dp"
-        android:layout_marginBottom="49dp"
-        android:background="@android:color/transparent"
-        android:contentDescription="@string/record_button"
-        android:scaleType="centerCrop"
+    <include
+        android:id="@+id/recordButtonLayout"
+        layout="@layout/layout_record_button"
+
+        android:layout_width="409dp"
+        android:layout_height="729dp"
+        android:layout_marginStart="50dp"
+        android:layout_marginTop="750dp"
+        android:layout_marginEnd="50dp"
+        android:layout_marginBottom="50dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.496"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView"
-        app:layout_constraintVertical_bias="0.82"
-        app:srcCompat="@drawable/microphone" />
+        app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
