@@ -1,24 +1,37 @@
 package com.blank.template;
 
-import android.animation.ObjectAnimator;
-import android.animation.PropertyValuesHolder;
-import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.ImageButton;
+import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+
+import com.blank.template.audio.AudioCapture;
+import com.blank.template.utils.HomeAnimation;
+
+import java.io.ByteArrayOutputStream;
 
 public class MainActivity extends AppCompatActivity {
 
+    private static final int REQUEST_RECORD_AUDIO_PERMISSION = 200;
+
+    private AudioCapture audioCapture;
     private boolean isRecording = false;
     private ImageButton btnRecord;
-    private View recordHalo;
-    private ValueAnimator haloAnimator;
+    private HomeAnimation anim;
+
+    private Thread recordingThread;
+    private ByteArrayOutputStream audioOutputStream;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,33 +41,15 @@ public class MainActivity extends AppCompatActivity {
         View wave = findViewById(R.id.onda1);
         View wave2 = findViewById(R.id.onda2);
         View wave3 = findViewById(R.id.onda3);
+        View recordHalo = findViewById(R.id.recordHalo);
 
-        animWave(wave, 0);
-        animWave(wave2, 2000);
-        animWave(wave3, 4000);
+        audioCapture = new AudioCapture(this);
+
+        anim = new HomeAnimation(new View[]{wave, wave2, wave3}, recordHalo);
+        anim.startWaveAnimation();
 
         btnRecord = findViewById(R.id.recordButton);
-        recordHalo = findViewById(R.id.recordHalo);
         setupRecordAnimation();
-    }
-
-    private void animWave(View view, long delay) {
-        PropertyValuesHolder scaleX = PropertyValuesHolder.ofFloat("scaleX", 1f, 5f);
-        PropertyValuesHolder scaleY = PropertyValuesHolder.ofFloat("scaleY", 1f, 5f);
-        PropertyValuesHolder alpha = PropertyValuesHolder.ofFloat("alpha", 0.8f, 0.1f);
-
-        ObjectAnimator animator = ObjectAnimator.ofPropertyValuesHolder(view, scaleX, scaleY, alpha);
-
-        animator.setDuration(4000);
-
-        animator.setRepeatCount(ValueAnimator.INFINITE);
-
-        animator.setRepeatMode(ValueAnimator.REVERSE);
-
-        animator.setInterpolator(new AccelerateDecelerateInterpolator());
-        animator.setStartDelay(delay);
-
-        animator.start();
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -62,86 +57,137 @@ public class MainActivity extends AppCompatActivity {
         btnRecord.setOnTouchListener((view, event) -> {
             switch (event.getActionMasked()) {
                 case MotionEvent.ACTION_DOWN:
-                    view.animate().cancel();
+                    if (!hasAudioPermission()) {
+                        requestAudioPermission();
+                        return true;
+                    }
 
+                    view.animate().cancel();
                     view.animate()
                             .scaleX(0.93f)
                             .scaleY(0.93f)
                             .setDuration(80)
                             .start();
 
-                    startHaloAnimation();
+                    anim.startHaloAnimation();
                     startRecording();
                     return true;
 
                 case MotionEvent.ACTION_UP:
                 case MotionEvent.ACTION_CANCEL:
+                    if (!hasAudioPermission()) return true;
+
                     stopRecording();
-                    stopHaloAnimation();
+                    anim.stopHaloAnimation();
 
                     view.animate().cancel();
                     view.animate()
                             .scaleX(1f)
                             .scaleY(1f)
                             .setDuration(160)
-                            .setInterpolator(
-                                    new DecelerateInterpolator()
-                            )
+                            .setInterpolator(new DecelerateInterpolator())
                             .start();
 
                     return true;
             }
-
             return true;
         });
     }
 
-    private void startHaloAnimation() {
-        recordHalo.setVisibility(View.VISIBLE);
-        recordHalo.setScaleX(0.85f);
-        recordHalo.setScaleY(0.85f);
-        recordHalo.setAlpha(0.65f);
-
-        haloAnimator = ValueAnimator.ofFloat(0f, 1f);
-        haloAnimator.setDuration(850);
-        haloAnimator.setRepeatCount(ValueAnimator.INFINITE);
-
-        haloAnimator.addUpdateListener(animation -> {
-            float progress = (float) animation.getAnimatedValue();
-
-            float scale = 0.85f + (0.45f * progress);
-
-            recordHalo.setScaleX(scale);
-            recordHalo.setScaleY(scale);
-            recordHalo.setAlpha(0.65f * (1f - progress));
-        });
-
-        haloAnimator.start();
-    }
-
-    private void stopHaloAnimation() {
-        if (haloAnimator != null) {
-            haloAnimator.cancel();
-            haloAnimator = null;
-        }
-
-        recordHalo.animate().cancel();
-        recordHalo.setAlpha(0f);
-        recordHalo.setVisibility(View.INVISIBLE);
-        recordHalo.setScaleX(0.85f);
-        recordHalo.setScaleY(0.85f);
-    }
-
     private void startRecording() {
         if (isRecording) return;
+        if (!audioCapture.isInitialized()) {
+            Toast.makeText(this, "AudioRecorder not initialized. Check permissions.", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
         isRecording = true;
+        audioOutputStream = new ByteArrayOutputStream();
+        audioCapture.startRecording();
 
-        // TODO: ADD RECORDING LOGIC HERE
+        recordingThread = new Thread(() -> {
+            while (isRecording) {
+                byte[] data = audioCapture.readAudioDataChunk();
+                if (data != null && data.length > 0) {
+                    audioOutputStream.write(data, 0, data.length);
+                }
+            }
+        });
+        recordingThread.start();
     }
 
     private void stopRecording() {
         if (!isRecording) return;
+
         isRecording = false;
+        if (recordingThread != null) {
+            recordingThread.interrupt();
+        }
+        audioCapture.stopRecording();
+
+        if (audioOutputStream != null) {
+            byte[] audioData = audioOutputStream.toByteArray();
+            audioOutputStream.reset();
+            System.out.println("Audio data length: " + audioData.length);
+            System.out.println("Audio data (first 100 bytes): " + java.util.Arrays.toString(java.util.Arrays.copyOf(audioData, Math.min(audioData.length, 100))));
+        }
+    }
+
+    private boolean hasAudioPermission() {
+        return checkSelfPermission(android.Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED;
+    }
+
+    private void requestAudioPermission() {
+        if (shouldShowRequestPermissionRationale(android.Manifest.permission.RECORD_AUDIO)) {
+            new AlertDialog.Builder(this)
+                    .setTitle("Se requiere permiso de micrófono")
+                    .setMessage("La app necesita acceso a tu micrófono para grabar audio.")
+                    .setPositiveButton("Dar permiso", (dialog, which) -> {
+                        requestPermissions(new String[]{android.Manifest.permission.RECORD_AUDIO}, REQUEST_RECORD_AUDIO_PERMISSION);
+                    })
+                    .setNegativeButton("Cancelar", (dialog, which) -> dialog.dismiss())
+                    .create()
+                    .show();
+        } else {
+            requestPermissions(new String[]{android.Manifest.permission.RECORD_AUDIO}, REQUEST_RECORD_AUDIO_PERMISSION);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == REQUEST_RECORD_AUDIO_PERMISSION) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                Toast.makeText(this, "Permiso de micrófono concedido. Ahora puedes grabar audio.", Toast.LENGTH_SHORT).show();
+            } else {
+                if (!shouldShowRequestPermissionRationale(android.Manifest.permission.RECORD_AUDIO)) {
+                    new AlertDialog.Builder(this)
+                            .setTitle("Permiso de micrófono denegado")
+                            .setMessage("Por favor, ve a la configuración de la aplicación para habilitarlo manualmente.")
+                            .setPositiveButton("Abrir configuración", (dialog, which) -> {
+                                Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                                intent.setData(Uri.fromParts("package", getPackageName(), null));
+                                startActivity(intent);
+                            })
+                            .setNegativeButton("Cancelar", (dialog, which) -> dialog.dismiss())
+                            .create()
+                            .show();
+                } else {
+                    Toast.makeText(this, "Permiso de micrófono denegado.", Toast.LENGTH_SHORT).show();
+                }
+            }
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        isRecording = false;
+        if (recordingThread != null) {
+            recordingThread.interrupt();
+        }
+        super.onDestroy();
+        if (audioCapture != null) {
+            audioCapture.release();
+        }
     }
 }
