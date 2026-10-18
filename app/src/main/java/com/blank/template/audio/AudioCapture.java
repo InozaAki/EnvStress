@@ -5,7 +5,7 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.media.AudioRecord;
 import androidx.core.app.ActivityCompat;
-import com.blank.template.utils.AudioConfig;
+import com.blank.template.config.AudioConfig;
 
 public class AudioCapture {
     private AudioRecord audioRecord;
