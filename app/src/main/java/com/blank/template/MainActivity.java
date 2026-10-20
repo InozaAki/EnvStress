@@ -17,6 +17,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.blank.template.audio.AudioCapture;
+import com.blank.template.audio.processing.AudioProcessing;
 import com.blank.template.utils.HomeAnimation;
 
 import java.io.ByteArrayOutputStream;
@@ -26,6 +27,7 @@ public class MainActivity extends AppCompatActivity {
     private static final int REQUEST_RECORD_AUDIO_PERMISSION = 200;
 
     private AudioCapture audioCapture;
+    private final AudioProcessing audioProcessing = new AudioProcessing();
     private boolean isRecording = false;
     private ImageButton btnRecord;
     private HomeAnimation anim;
@@ -128,6 +130,7 @@ public class MainActivity extends AppCompatActivity {
         if (audioOutputStream != null) {
             byte[] audioData = audioOutputStream.toByteArray();
             audioOutputStream.reset();
+            audioProcessing.process(audioData);
             System.out.println("Audio data length: " + audioData.length);
             System.out.println("Audio data (first 100 bytes): " + java.util.Arrays.toString(java.util.Arrays.copyOf(audioData, Math.min(audioData.length, 100))));
         }

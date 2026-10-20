@@ -14,7 +14,7 @@ public class FFT {
      * @param input The input signal (time domain).
      * @return The magnitude spectrum (frequency domain).
      */
-    private static double[] computeFFT(@NotNull double[] input) {
+    public static double[] compute(@NotNull double[] input) {
         int n = input.length;
         if ((n & (n - 1)) != 0) throw new IllegalArgumentException("Input length must be a power of 2");
 
@@ -71,13 +71,13 @@ public class FFT {
     }
 
     /**
-     * Searches for the fundamental frequency (F0) in the FFT result.
+     * Returns the fundamental frequency (F0) in the FFT result.
      *
      * @param fftResult The magnitude spectrum obtained from the FFT.
      * @param sampleRate The sample rate of the audio signal.
      * @return The fundamental frequency in Hz, or 0.0 if not found.
      */
-    public static double searchFundamentalFrequency(@NotNull double[] fftResult, int sampleRate) {
+    public static double fundamentalFrequency(@NotNull double[] fftResult, int sampleRate) {
         int fftSize = fftResult.length * 2;
         int minIndex = Math.max(frequencyToIndex(AudioConfig.MIN_F0, sampleRate, fftSize), 1);
         int maxIndex = Math.min(frequencyToIndex(AudioConfig.MAX_F0, sampleRate, fftSize), fftResult.length - 1);

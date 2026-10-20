@@ -16,12 +16,15 @@ public final class AudioConfig {
 
 
     // Audio Processing Configuration
-    public static final int FFT_SIZE = 2048;
     public static final float PCM_16_BIT_MAX = 32768.0f;
     public static final double MIN_F0 = 80.0;
     public static final double MAX_F0 = 300.0;
     public static final double MIN_SPECTRUM_FREQ = 80.0;
     public static final double MAX_SPECTRUM_FREQ = 4000.0;
     public static final double SILENCE_THRESHOLD = 1.0;
+
+    // Audio Processing Thread Configuration
+    public static final int AUDIO_PROCESSING_THREAD_PRIORITY = Thread.MAX_PRIORITY;
+    public static final int AUDIO_PROCESSING_FIXED_THREAD_POOL_SIZE = 4;
 
 }
