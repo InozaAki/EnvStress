@@ -1,6 +1,7 @@
 package com.blank.template.audio.processing;
 
 import com.blank.template.config.AudioConfig;
+import com.blank.template.event.UiAudioDispatcher;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -10,8 +11,10 @@ import java.util.concurrent.Executors;
 public class AudioProcessing {
 
     private final ExecutorService executorService;
+    private final UiAudioDispatcher dispatcher;
 
-    public AudioProcessing() {
+    public AudioProcessing(UiAudioDispatcher dispatcher) {
+        this.dispatcher = dispatcher;
         executorService = Executors.newFixedThreadPool(
                 AudioConfig.AUDIO_PROCESSING_FIXED_THREAD_POOL_SIZE,
                 r -> {
@@ -31,7 +34,7 @@ public class AudioProcessing {
         executorService.submit(() -> processAudioData(audioData));
     }
 
-    private static void processAudioData(byte[] audioData) {
+    private void processAudioData(byte[] audioData) {
         if (audioData == null || audioData.length == 0) {
             return;
         }
@@ -56,16 +59,16 @@ public class AudioProcessing {
         double[] fftOutput = FFT.compute(fftInput);
 
         //TODO: Further processing of fftOutput, such as filtering, feature extraction, etc.
-        //TODO: Implement this into a Thread to avoid blocking the main thread.
 
-
-        // Once processing is done, send the results to the UI thread for display or further action.
-        sendToUiThread();
+        sendToUiThread(fftOutput);
     }
 
-    //TODO: Implement EventListener and EventPublisher to send the processed data to the UI thread.
-    private static void sendToUiThread(){
-
+    private void sendToUiThread(double[] fftOutput) {
+        if(dispatcher == null) return;
+        dispatcher.dispatch(
+                FFT.fundamentalFrequency(fftOutput, AudioConfig.SAMPLE_RATE),
+                FFT.magnitudeSpectrum(fftOutput)
+        );
     }
 
     /**

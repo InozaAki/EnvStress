@@ -125,4 +125,18 @@ public class FFT {
     public static int frequencyToIndex(double frequency, int sampleRate, int fftSize) {
         return (int) Math.round(frequency * fftSize / sampleRate);
     }
+
+    /**
+     * Computes the magnitude spectrum of the given FFT result.
+     *
+     * @param compute The FFT result.
+     * @return The magnitude spectrum.
+     */
+    public static double magnitudeSpectrum(double[] compute) {
+        double[] magnitudeSpectrum = new double[compute.length];
+        for (int i = 0; i < compute.length; i++) {
+            magnitudeSpectrum[i] = Math.abs(compute[i]);
+        }
+        return Arrays.stream(magnitudeSpectrum).max().orElse(0.0);
+    }
 }

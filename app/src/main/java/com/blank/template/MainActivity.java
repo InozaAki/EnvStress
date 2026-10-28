@@ -10,6 +10,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.ImageButton;
+import android.widget.SeekBar;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -18,6 +19,8 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.blank.template.audio.AudioCapture;
 import com.blank.template.audio.processing.AudioProcessing;
+import com.blank.template.event.UiAudioDispatcher;
+import com.blank.template.event.UiAudioListener;
 import com.blank.template.utils.HomeAnimation;
 
 import java.io.ByteArrayOutputStream;
@@ -27,8 +30,9 @@ public class MainActivity extends AppCompatActivity {
     private static final int REQUEST_RECORD_AUDIO_PERMISSION = 200;
 
     private AudioCapture audioCapture;
-    private final AudioProcessing audioProcessing = new AudioProcessing();
-    private boolean isRecording = false;
+    private UiAudioDispatcher dispatcher;
+    private AudioProcessing audioProcessing;
+    private volatile boolean isRecording = false;
     private ImageButton btnRecord;
     private HomeAnimation anim;
 
@@ -40,15 +44,32 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        dispatcher = new UiAudioDispatcher();
+
+        dispatcher.setListener(new UiAudioListener() {
+            @Override
+            public void onAudioDataReceived(double f0, double magnitude) {
+                runOnUiThread(() -> anim.updateMetrics(f0, magnitude));
+            }
+
+            @Override
+            public void onAudioProcessingError(Exception e) {
+                runOnUiThread(() -> Toast.makeText(MainActivity.this, "Error processing audio: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+            }
+        });
+
+        audioProcessing = new AudioProcessing(dispatcher);
+
         View wave = findViewById(R.id.onda1);
         View wave2 = findViewById(R.id.onda2);
         View wave3 = findViewById(R.id.onda3);
         View recordHalo = findViewById(R.id.recordHalo);
+        View background = findViewById(R.id.background);
 
         audioCapture = new AudioCapture(this);
 
-        anim = new HomeAnimation(new View[]{wave, wave2, wave3}, recordHalo);
-        anim.startWaveAnimation();
+        anim = new HomeAnimation(new View[]{wave, wave2, wave3}, recordHalo, background);
+        anim.start();
 
         btnRecord = findViewById(R.id.recordButton);
         setupRecordAnimation();
@@ -131,8 +152,6 @@ public class MainActivity extends AppCompatActivity {
             byte[] audioData = audioOutputStream.toByteArray();
             audioOutputStream.reset();
             audioProcessing.process(audioData);
-            System.out.println("Audio data length: " + audioData.length);
-            System.out.println("Audio data (first 100 bytes): " + java.util.Arrays.toString(java.util.Arrays.copyOf(audioData, Math.min(audioData.length, 100))));
         }
     }
 
@@ -162,6 +181,11 @@ public class MainActivity extends AppCompatActivity {
         if (requestCode == REQUEST_RECORD_AUDIO_PERMISSION) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 Toast.makeText(this, "Permiso de micrófono concedido. Ahora puedes grabar audio.", Toast.LENGTH_SHORT).show();
+
+                if (audioCapture == null) {
+                    audioCapture = new AudioCapture(this);
+                }
+
             } else {
                 if (!shouldShowRequestPermissionRationale(android.Manifest.permission.RECORD_AUDIO)) {
                     new AlertDialog.Builder(this)
