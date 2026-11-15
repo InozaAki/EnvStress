@@ -10,6 +10,8 @@ import com.blank.template.config.AudioConfig;
 public class AudioCapture {
     private AudioRecord audioRecord;
 
+    public volatile boolean isRecording = false;
+
     public AudioCapture(Context context) {
         if (ActivityCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
             return;
@@ -32,6 +34,7 @@ public class AudioCapture {
         if (isInitialized()) {
             try {
                 audioRecord.startRecording();
+                isRecording = true;
             } catch (IllegalStateException e) {
                 e.printStackTrace();
             }
@@ -42,6 +45,7 @@ public class AudioCapture {
         if (isInitialized()) {
             try {
                 audioRecord.stop();
+                isRecording = false;
             } catch (IllegalStateException e) {
                 e.printStackTrace();
             }

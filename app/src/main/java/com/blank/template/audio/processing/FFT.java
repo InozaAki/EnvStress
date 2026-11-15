@@ -98,7 +98,6 @@ public class FFT {
         }
 
         double fundamentalFrequency = indexToFrequency(fundamentalIndex, sampleRate, fftSize);
-        System.out.printf("F0: %.2f Hz | FFT bin: %d | Magnitude: %.4f%n", fundamentalFrequency, fundamentalIndex, maxMagnitude);
         return fundamentalFrequency;
     }
 
@@ -132,11 +131,39 @@ public class FFT {
      * @param compute The FFT result.
      * @return The magnitude spectrum.
      */
-    public static double magnitudeSpectrum(double[] compute) {
-        double[] magnitudeSpectrum = new double[compute.length];
-        for (int i = 0; i < compute.length; i++) {
-            magnitudeSpectrum[i] = Math.abs(compute[i]);
+    /**
+     * Computes the peak (maximum) magnitude from the FFT result.
+     *
+     * @param fftMagnitudeResult The magnitude spectrum array from FFT.compute().
+     * @return The maximum magnitude value.
+     */
+    public static double peakMagnitude(
+            @NotNull double[] fftMagnitudeResult,
+            int originalSampleCount
+    ) {
+        if (fftMagnitudeResult.length == 0 || originalSampleCount <= 0) {
+            return 0.0;
         }
-        return Arrays.stream(magnitudeSpectrum).max().orElse(0.0);
+
+        double max = 0.0;
+
+        for (double mag : fftMagnitudeResult) {
+            if (mag > max) {
+                max = mag;
+            }
+        }
+
+        return (2.0 * max) / originalSampleCount;
+    }
+
+    public static double calculateRMS(@NotNull double[] timeDomainSignal) {
+        if (timeDomainSignal.length == 0) return 0.0;
+
+        double sum = 0.0;
+        for (double sample : timeDomainSignal) {
+            sum += sample * sample;
+        }
+
+        return Math.sqrt(sum / timeDomainSignal.length);
     }
 }

@@ -4,14 +4,15 @@ import android.animation.ArgbEvaluator;
 import android.animation.ValueAnimator;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
+import android.graphics.drawable.GradientDrawable;
 import android.view.View;
 import android.view.animation.LinearInterpolator;
+
+import com.blank.template.config.AudioConfig;
 
 public class HomeAnimation {
     private static final float WAVE_PERIOD_CALM = 4f;
     private static final float WAVE_PERIOD_STRESSED = 2f;
-    private static final float HALO_PERIOD_CALM = 0.85f;
-    private static final float HALO_PERIOD_STRESSED = 0.45f;
     private static final float SMOOTHING_TAU = 0.6f;
 
     private static final int[] PALETTE = {
@@ -26,21 +27,32 @@ public class HomeAnimation {
     private static final int WAVE_STRESSED = 0xFF00424A;
 
     private final View[] waves;
-    private final View halo;
     private final View background;
     private final ArgbEvaluator evaluator = new ArgbEvaluator();
     private final ValueAnimator clock = ValueAnimator.ofFloat(0f, 1f);
 
+    private final GradientDrawable backgroundGradient;
+
     private long lastNanos;
-    private float wavePhase, haloPhase;
-    private boolean haloActive;
+    private float wavePhase;
     private float targetStress, stress, targetLevel, level;
 
-    public HomeAnimation(View[] waves, View halo, View background) {
-        this.waves = waves;
-        this.halo = halo;
-        this.background = background;
+    private double dynamicBaselineF0 = 0.0;
+    private int calibrationSamplesCount = 0;
+    private static final int REQUIRED_CALIBRATION_SAMPLES = 50;
+    private static final int SMOOTHING_WINDOW_SIZE = 10;
+    private final float[] stressHistory = new float[SMOOTHING_WINDOW_SIZE];
+    private int historyIndex = 0;
+    private int historyCount = 0;
 
+    public HomeAnimation(View[] waves, View background) {
+        this.waves = waves;
+        this.background = background;
+        this.backgroundGradient = new GradientDrawable();
+        this.backgroundGradient.setOrientation(GradientDrawable.Orientation.TL_BR);
+        if (this.background != null) {
+            this.background.setBackground(this.backgroundGradient);
+        }
         clock.setDuration(1000);
         clock.setRepeatCount(ValueAnimator.INFINITE);
         clock.setInterpolator(new LinearInterpolator());
@@ -51,8 +63,54 @@ public class HomeAnimation {
     public void stop()  { clock.cancel(); }
 
     public void updateMetrics(double f0, double magnitude) {
-        targetStress = clamp01((float) ((f0 - 100.0) / 180.0));
-        targetLevel  = clamp01((float) magnitude);
+
+        float environmentalLevel = clamp01(
+                (float) ((magnitude - AudioConfig.RMS_THRESHOLD) / AudioConfig.RMS_LEVEL_RANGE)
+        );
+
+        boolean voiceDetected = f0 >= AudioConfig.MIN_F0 && f0 <= AudioConfig.MAX_F0;
+
+        float currentRawStress = 0f;
+
+        if (voiceDetected) {
+            if (calibrationSamplesCount < REQUIRED_CALIBRATION_SAMPLES) {
+                dynamicBaselineF0 += f0;
+                calibrationSamplesCount++;
+                if (calibrationSamplesCount == REQUIRED_CALIBRATION_SAMPLES) {
+                    dynamicBaselineF0 /= REQUIRED_CALIBRATION_SAMPLES;
+                }
+                currentRawStress = environmentalLevel;
+            } else {
+                float pitchStress = calculatePitchStress(f0);
+                float volumeStress = clamp01(
+                        (float) ((magnitude - AudioConfig.RMS_THRESHOLD) / AudioConfig.RMS_STRESS_RANGE)
+                );
+                currentRawStress = 0.65f * pitchStress + 0.35f * volumeStress;
+            }
+        } else {
+            currentRawStress = environmentalLevel;
+        }
+
+        stressHistory[historyIndex] = currentRawStress;
+        historyIndex = (historyIndex + 1) % SMOOTHING_WINDOW_SIZE;
+        if (historyCount < SMOOTHING_WINDOW_SIZE) historyCount++;
+
+        float sumStress = 0f;
+        for (int i = 0; i < historyCount; i++) {
+            sumStress += stressHistory[i];
+        }
+
+        targetStress = sumStress / historyCount;
+        targetLevel = environmentalLevel;
+    }
+
+    private float calculatePitchStress(double f0) {
+        if (f0 <= 0 || dynamicBaselineF0 <= 0) {
+            return 0f;
+        }
+        double semitones = 12.0 * Math.log(f0 / dynamicBaselineF0) / Math.log(2.0);
+
+        return clamp01((float) (semitones / AudioConfig.VOCAL_F0_STRESS_RANGE));
     }
 
     private void onFrame() {
@@ -65,7 +123,6 @@ public class HomeAnimation {
         level  += (targetLevel  - level)  * k;
 
         renderWaves(dt);
-        renderHalo(dt);
         renderBackground();
     }
 
@@ -94,30 +151,15 @@ public class HomeAnimation {
         }
     }
 
-    private void renderHalo(float dt) {
-        if (!haloActive) return;
-        haloPhase = (haloPhase + dt / lerp(HALO_PERIOD_CALM, HALO_PERIOD_STRESSED, stress)) % 1f;
-        float scale = 0.85f + 0.45f * haloPhase;
-        halo.setScaleX(scale);
-        halo.setScaleY(scale);
-        halo.setAlpha(0.65f * (1f - haloPhase));
-    }
-
     private void renderBackground() {
         if (background == null) return;
-        background.setBackgroundColor(colorAt(PALETTE_POS, stress));
-    }
 
-    public void startHaloAnimation() {
-        haloActive = true;
-        haloPhase = 0f;
-        halo.setVisibility(View.VISIBLE);
-    }
+        float slowTime = (System.currentTimeMillis() % 8000) / 8000f;
+        float breathingOffset = (float) (Math.sin(slowTime * Math.PI * 2) * 0.15f);
+        int colorStart = colorAt(PALETTE_POS, stress);
+        int colorEnd = colorAt(PALETTE_POS, clamp01(stress + 0.20f + breathingOffset));
 
-    public void stopHaloAnimation() {
-        haloActive = false;
-        halo.setAlpha(0f);
-        halo.setVisibility(View.INVISIBLE);
+        backgroundGradient.setColors(new int[]{colorStart, colorEnd});
     }
 
     private static float lerp(float a, float b, float t) { return a + (b - a) * t; }

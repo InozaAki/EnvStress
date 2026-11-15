@@ -16,16 +16,22 @@ public class UiAudioDispatcher {
     }
 
     public void dispatch(final double f0, final double magnitude) {
-        new Thread(() -> {
-            try{
-                if (listener != null) {
-                    UiHandler.post(() -> listener.onAudioDataReceived(f0, magnitude));
+        if (listener != null) {
+            UiHandler.post(() -> {
+                try {
+                    listener.onAudioDataReceived(f0, magnitude);
+                } catch (Exception e) {
+                    listener.onAudioProcessingError(e);
                 }
-            } catch (Exception e) {
-                if (listener != null) {
-                    UiHandler.post(() -> listener.onAudioProcessingError(e));
-                }
-            }
-        }).start();
+            });
+        }
+    }
+
+    public void dispatchError(Exception e) {
+        if (listener != null) {
+            UiHandler.post(() -> {
+                listener.onAudioProcessingError(e);
+            });
+        }
     }
 }

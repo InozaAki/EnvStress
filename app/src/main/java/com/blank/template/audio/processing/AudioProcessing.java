@@ -1,10 +1,9 @@
 package com.blank.template.audio.processing;
 
+import com.blank.template.audio.AudioCapture;
 import com.blank.template.config.AudioConfig;
 import com.blank.template.event.UiAudioDispatcher;
-
 import org.jetbrains.annotations.NotNull;
-
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -25,19 +24,25 @@ public class AudioProcessing {
         );
     }
 
-    /**
-     * Processes the given audio data asynchronously.
-     * @param audioData The audio data to process.
-     */
-    public void process(@NotNull byte[] audioData) {
+    public void startProcessingLoop(@NotNull AudioCapture audioCapture){
         if(executorService == null || executorService.isShutdown()) return;
-        executorService.submit(() -> processAudioData(audioData));
+
+        try {
+            executorService.submit(() -> {
+                while(!Thread.currentThread().isInterrupted() && audioCapture.isRecording){
+                    byte[] audioData = audioCapture.readAudioDataChunk();
+                    if (audioData != null && audioData.length > 0) {
+                        processAudioData(audioData);
+                    }
+                }
+            });
+        } catch (Exception e) {
+            dispatcher.dispatchError(e);
+        }
     }
 
     private void processAudioData(byte[] audioData) {
-        if (audioData == null || audioData.length == 0) {
-            return;
-        }
+        if (audioData == null || audioData.length == 0) return;
 
         int numSamples = audioData.length / 2;
         double[] floatChunk = new double[numSamples];
@@ -48,36 +53,41 @@ public class AudioProcessing {
             floatChunk[i] = (short) ((high << 8) | low) / AudioConfig.PCM_16_BIT_MAX;
         }
 
-        int fftSize = Integer.highestOneBit(numSamples);
-        if (fftSize < numSamples) {
-            fftSize <<= 1;
+        double rmsVolume = FFT.calculateRMS(floatChunk);
+
+        if (rmsVolume < AudioConfig.RMS_THRESHOLD) {
+            sendToUiThread(0.0, rmsVolume);
+            return;
         }
+
+        int fftSize = Integer.highestOneBit(numSamples);
+        if (fftSize < numSamples) fftSize <<= 1;
 
         double[] fftInput = new double[fftSize];
         System.arraycopy(floatChunk, 0, fftInput, 0, numSamples);
 
         double[] fftOutput = FFT.compute(fftInput);
 
-        //TODO: Further processing of fftOutput, such as filtering, feature extraction, etc.
-
-        sendToUiThread(fftOutput);
-    }
-
-    private void sendToUiThread(double[] fftOutput) {
-        if(dispatcher == null) return;
-        dispatcher.dispatch(
-                FFT.fundamentalFrequency(fftOutput, AudioConfig.SAMPLE_RATE),
-                FFT.magnitudeSpectrum(fftOutput)
+        double f0 = FFT.fundamentalFrequency(
+                fftOutput,
+                AudioConfig.SAMPLE_RATE
         );
+
+        if (f0 < AudioConfig.MIN_F0 || f0 > AudioConfig.MAX_F0) {
+            f0 = 0.0;
+        }
+
+        sendToUiThread(f0, rmsVolume);
     }
 
-    /**
-     * Shuts down the executor service when the application is destroyed.
-     */
+    private void sendToUiThread(double f0, double magnitude) {
+        if(dispatcher == null) return;
+        dispatcher.dispatch(f0, magnitude);
+    }
+
     public void onDestroy() {
         if (executorService != null && !executorService.isShutdown()) {
             executorService.shutdown();
         }
     }
-
 }
