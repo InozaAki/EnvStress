@@ -1,7 +1,12 @@
 package com.blank.template.splash;
 
+/**
+ * Utility class for storing phrases used in the splash screen.
+ */
 public final class Phrases {
-
+    /**
+     * Prevents instantiation of this constant holder.
+     */
     private Phrases () {}
 
     public static final String[] PHRASES = {

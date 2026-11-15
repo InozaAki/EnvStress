@@ -14,7 +14,7 @@ The application leverages in algorithms such as the FFT and the MFCC to analyze 
 Also using the [RAVDESS Emotional Speech Audio](https://doi.org/10.34740/KAGGLE/DSV/256618) to fine-tune the stress detection model and improve its accuracy in real-world scenarios.
 
 
-Check the [Documentation](docs/) for more information.
+Check the [Documentation](docs/index.html) for information about the current implementation.
 
 
 ## Enviroment Setup

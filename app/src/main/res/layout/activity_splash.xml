@@ -4,23 +4,31 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#EDF6F9">
+    android:background="@color/background_primary">
 
     <ImageView
         android:id="@+id/pulse_indicator"
-        android:layout_width="247dp"
-        android:layout_height="215dp"
-        android:layout_marginStart="83dp"
-        android:layout_marginEnd="82dp"
-        android:layout_marginBottom="189dp"
+        android:layout_width="220dp"
+        android:layout_height="220dp"
         android:contentDescription="@string/splash_icon"
         android:src="@drawable/circle"
-        android:tint="#DEE2FF"
-        app:layout_constraintBottom_toTopOf="@+id/phrase"
+        app:tint="#A483C5BE"
+        app:layout_constraintBottom_toTopOf="@id/phrase"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        tools:ignore="ImageContrastCheck" />
+        app:layout_constraintVertical_bias="0.42" />
+    
+    <com.blank.template.splash.RingHighlightView
+        android:id="@+id/ring_highlight"
+        android:layout_width="220dp"
+        android:layout_height="220dp"
+        android:contentDescription="@null"
+        app:layout_constraintTop_toTopOf="@id/pulse_indicator"
+        app:layout_constraintBottom_toBottomOf="@id/pulse_indicator"
+        app:layout_constraintStart_toStartOf="@id/pulse_indicator"
+        app:layout_constraintEnd_toEndOf="@id/pulse_indicator" />
+
 
     <TextView
         android:id="@+id/phrase"
@@ -31,7 +39,7 @@
         android:fontFamily="sans-serif-condensed"
         android:letterSpacing="0.05"
         android:textAlignment="center"
-        android:textColor="#4A5568"
+        android:textColor="@color/text_primary"
         android:textSize="22sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
