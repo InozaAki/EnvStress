@@ -16,7 +16,6 @@ import com.blank.template.event.UiAudioListener;
 import com.blank.template.utils.HomeAnimation;
 
 public class MainActivity extends AppCompatActivity {
-
     private static final int REQUEST_RECORD_AUDIO_PERMISSION = 200;
 
     private AudioCapture audioCapture;
@@ -24,6 +23,11 @@ public class MainActivity extends AppCompatActivity {
     private AudioProcessing audioProcessing;
     private HomeAnimation anim;
 
+    /**
+     * Initializes the main screen, audio processing pipeline, and visual animation.
+     *
+     * @param savedInstanceState previously saved activity state, or {@code null}
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -60,6 +64,9 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Creates the audio capture instance when necessary and starts recording.
+     */
     private void initAudio() {
         if (audioCapture == null) {
             audioCapture = new AudioCapture(this);
@@ -67,19 +74,37 @@ public class MainActivity extends AppCompatActivity {
         startRecording();
     }
 
+    /**
+     * Starts audio capture and submits the processing loop.
+     */
     private void startRecording() {
         audioCapture.startRecording();
         audioProcessing.startProcessingLoop(this.audioCapture);
     }
 
+    /**
+     * Stops audio capture when it has been initialized.
+     */
     private void stopRecording() {
         if (audioCapture != null) audioCapture.stopRecording();
     }
 
+    /**
+     * Checks if the application has {@link android.Manifest.permission#RECORD_AUDIO} permission.
+     * @return {@code true} when microphone recording permission is granted
+     */
     private boolean hasAudioPermission() {
         return checkSelfPermission(Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED;
     }
 
+    /**
+     * Handles the microphone permission result and initializes audio when access is granted.
+     * @param requestCode The request code passed in {@link #requestPermissions}.
+     * @param permissions The requested permissions. Never null.
+     * @param grantResults The grant results for the corresponding permissions which is either
+     *                     {@link android.content.pm.PackageManager#PERMISSION_GRANTED} or
+     *                     {@link android.content.pm.PackageManager#PERMISSION_DENIED}. Never null.
+     */
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -90,6 +115,9 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Stops audio capture and releases audio-processing resources.
+     */
     @Override
     protected void onDestroy() {
         stopRecording();

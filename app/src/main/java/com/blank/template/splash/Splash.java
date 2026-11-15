@@ -11,7 +11,17 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.blank.template.MainActivity;
 import com.blank.template.R;
 
+/**
+ * Splash Screen / Loading screen
+ * Launched first, shows a random phrase and
+ * has a loading ring animation (no resources are being actually loaded)
+ */
 public class Splash extends AppCompatActivity {
+    /**
+     * Displays a random calming phrase and animated loading ring before opening the main screen.
+     *
+     * @param savedInstanceState previously saved activity state, or {@code null}
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -35,6 +45,6 @@ public class Splash extends AppCompatActivity {
             startActivity(new Intent(Splash.this, MainActivity.class));
             overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
             finish();
-        }, 6000);
+        }, 4000);
     }
 }

@@ -10,6 +10,9 @@ import android.view.animation.LinearInterpolator;
 
 import com.blank.template.config.AudioConfig;
 
+/**
+ * HomeAnimation class is responsible for animating the home screen.
+ */
 public class HomeAnimation {
     private static final float WAVE_PERIOD_CALM = 4f;
     private static final float WAVE_PERIOD_STRESSED = 2f;
@@ -45,6 +48,12 @@ public class HomeAnimation {
     private int historyIndex = 0;
     private int historyCount = 0;
 
+    /**
+     * Creates the home-screen animation and attaches its gradient to the background view.
+     *
+     * @param waves wave views animated in sequence
+     * @param background view whose gradient reflects the current stress level
+     */
     public HomeAnimation(View[] waves, View background) {
         this.waves = waves;
         this.background = background;
@@ -59,9 +68,22 @@ public class HomeAnimation {
         clock.addUpdateListener(a -> onFrame());
     }
 
+    /**
+     * Starts the frame clock and visual animation.
+     */
     public void start() { lastNanos = System.nanoTime(); clock.start(); }
+
+    /**
+     * Stops the frame clock and visual animation.
+     */
     public void stop()  { clock.cancel(); }
 
+    /**
+     * Updates target stress and environmental level from audio metrics.
+     *
+     * @param f0 detected fundamental frequency in hertz
+     * @param magnitude RMS magnitude of the audio signal
+     */
     public void updateMetrics(double f0, double magnitude) {
 
         float environmentalLevel = clamp01(
@@ -104,6 +126,12 @@ public class HomeAnimation {
         targetLevel = environmentalLevel;
     }
 
+    /**
+     * Converts pitch deviation from the calibrated baseline into a stress value.
+     *
+     * @param f0 detected fundamental frequency in hertz
+     * @return normalized pitch stress in the range [0, 1]
+     */
     private float calculatePitchStress(double f0) {
         if (f0 <= 0 || dynamicBaselineF0 <= 0) {
             return 0f;
@@ -113,6 +141,9 @@ public class HomeAnimation {
         return clamp01((float) (semitones / AudioConfig.VOCAL_F0_STRESS_RANGE));
     }
 
+    /**
+     * Advances smoothed animation values and renders the current frame.
+     */
     private void onFrame() {
         long now = System.nanoTime();
         float dt = Math.min((now - lastNanos) / 1e9f, 0.05f);
@@ -126,6 +157,11 @@ public class HomeAnimation {
         renderBackground();
     }
 
+    /**
+     * Renders the wave views using the current stress and audio level.
+     *
+     * @param dt elapsed time since the previous frame, in seconds
+     */
     private void renderWaves(float dt) {
         float period = lerp(WAVE_PERIOD_CALM, WAVE_PERIOD_STRESSED, stress);
         wavePhase = (wavePhase + dt / period) % 1f;
@@ -151,6 +187,9 @@ public class HomeAnimation {
         }
     }
 
+    /**
+     * Updates the background gradient using stress and a slow breathing variation.
+     */
     private void renderBackground() {
         if (background == null) return;
 
@@ -162,8 +201,31 @@ public class HomeAnimation {
         backgroundGradient.setColors(new int[]{colorStart, colorEnd});
     }
 
+    /**
+     * Linearly interpolates between two values.
+     *
+     * @param a start value
+     * @param b end value
+     * @param t interpolation factor
+     * @return interpolated value
+     */
     private static float lerp(float a, float b, float t) { return a + (b - a) * t; }
+
+    /**
+     * Restricts a value to the inclusive range [0, 1].
+     *
+     * @param v value to restrict
+     * @return clamped value
+     */
     private static float clamp01(float v) { return Math.max(0f, Math.min(1f, v)); }
+
+    /**
+     * Interpolates the configured palette at a normalized position.
+     *
+     * @param pos palette stop positions
+     * @param t normalized palette position
+     * @return interpolated ARGB color
+     */
     private int colorAt(float[] pos, float t) {
         for (int i = 0; i < HomeAnimation.PALETTE.length - 1; i++) {
             if (t <= pos[i + 1]) {

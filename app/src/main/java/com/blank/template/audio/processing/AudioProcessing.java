@@ -7,11 +7,21 @@ import org.jetbrains.annotations.NotNull;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+/**
+ * AudioProcessing class is responsible for processing the audio data
+ * Uses ExecutorService (Thread Pool) to process the audio data in a separate thread.
+ * And sends the data to the UI Thread via the UiAudioDispatcher.
+ */
 public class AudioProcessing {
 
     private final ExecutorService executorService;
     private final UiAudioDispatcher dispatcher;
 
+    /**
+     * Creates an audio processor backed by a fixed-size worker pool.
+     *
+     * @param dispatcher dispatcher used to deliver metrics and errors to the UI
+     */
     public AudioProcessing(UiAudioDispatcher dispatcher) {
         this.dispatcher = dispatcher;
         executorService = Executors.newFixedThreadPool(
@@ -24,6 +34,17 @@ public class AudioProcessing {
         );
     }
 
+    /**
+     * Starts the audio processing loop via the executor service.
+     *
+     * Audio chunks are read while capture is active, converted to normalized samples, and
+     * analyzed without blocking the main thread.
+     *
+     * The amount of Threads in the pool can be configured at
+     * {@link com.blank.template.config.AudioConfig#AUDIO_PROCESSING_FIXED_THREAD_POOL_SIZE}
+     *
+     * @param audioCapture recorder used to obtain PCM audio chunks
+     */
     public void startProcessingLoop(@NotNull AudioCapture audioCapture){
         if(executorService == null || executorService.isShutdown()) return;
 
@@ -41,6 +62,12 @@ public class AudioProcessing {
         }
     }
 
+    /**
+     * Converts a PCM 16-bit chunk to normalized samples, calculates RMS and fundamental
+     * frequency, and sends the resulting metrics to the UI dispatcher.
+     *
+     * @param audioData raw PCM 16-bit audio bytes
+     */
     private void processAudioData(byte[] audioData) {
         if (audioData == null || audioData.length == 0) return;
 
@@ -80,11 +107,20 @@ public class AudioProcessing {
         sendToUiThread(f0, rmsVolume);
     }
 
+    /**
+     * Sends audio metrics to the UI thread through the configured dispatcher.
+     *
+     * @param f0 fundamental frequency in hertz, or {@code 0.0} when unavailable
+     * @param magnitude RMS magnitude of the audio signal
+     */
     private void sendToUiThread(double f0, double magnitude) {
         if(dispatcher == null) return;
         dispatcher.dispatch(f0, magnitude);
     }
 
+    /**
+     * Stops accepting new processing work and shuts down the worker pool.
+     */
     public void onDestroy() {
         if (executorService != null && !executorService.isShutdown()) {
             executorService.shutdown();

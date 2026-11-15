@@ -4,7 +4,13 @@ import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
 
+/**
+ * Utility class for Audio Capture and Processing Configuration
+ */
 public final class AudioConfig {
+    /**
+     * Prevents instantiation of this configuration holder.
+     */
     private AudioConfig() {}
 
     // Audio Capture Configuration

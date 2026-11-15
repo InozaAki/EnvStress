@@ -11,10 +11,21 @@ public class UiAudioDispatcher {
 
     private final Handler UiHandler = new Handler(Looper.getMainLooper());
 
+    /**
+     * Registers the listener that receives audio events on the main thread.
+     *
+     * @param listener listener to notify, or {@code null} to disable notifications
+     */
     public void setListener(UiAudioListener listener) {
         this.listener = listener;
     }
 
+    /**
+     * Dispatches audio metrics to the listener on the main thread.
+     *
+     * @param f0 fundamental frequency in hertz
+     * @param magnitude signal magnitude, represented by the audio-processing pipeline
+     */
     public void dispatch(final double f0, final double magnitude) {
         if (listener != null) {
             UiHandler.post(() -> {
@@ -27,6 +38,11 @@ public class UiAudioDispatcher {
         }
     }
 
+    /**
+     * Dispatches an audio-processing error to the listener on the main thread.
+     *
+     * @param e exception raised while processing audio
+     */
     public void dispatchError(Exception e) {
         if (listener != null) {
             UiHandler.post(() -> {

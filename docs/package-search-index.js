@@ -1,0 +1,1 @@
+packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html"},{"l":"com.blank.template"},{"l":"com.blank.template.audio"},{"l":"com.blank.template.audio.processing"},{"l":"com.blank.template.config"},{"l":"com.blank.template.event"},{"l":"com.blank.template.splash"},{"l":"com.blank.template.utils"}];updateSearchResults();

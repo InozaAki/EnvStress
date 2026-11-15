@@ -9,10 +9,12 @@ import java.util.Arrays;
 public class FFT {
 
     /**
-     * Computes the FFT of the input signal and returns the magnitude spectrum.
+     * Computes the fast Fourier transform of a time-domain signal and returns its
+     * positive-frequency magnitude spectrum.
      *
      * @param input The input signal (time domain).
-     * @return The magnitude spectrum (frequency domain).
+     * @return the magnitude spectrum containing {@code input.length / 2} bins
+     * @throws IllegalArgumentException if the input length is not a power of two
      */
     public static double[] compute(@NotNull double[] input) {
         int n = input.length;
@@ -71,11 +73,11 @@ public class FFT {
     }
 
     /**
-     * Returns the fundamental frequency (F0) in the FFT result.
+     * Finds the strongest fundamental-frequency candidate in the configured vocal range.
      *
      * @param fftResult The magnitude spectrum obtained from the FFT.
      * @param sampleRate The sample rate of the audio signal.
-     * @return The fundamental frequency in Hz, or 0.0 if not found.
+     * @return the fundamental frequency in hertz, or {@code 0.0} if no candidate is found
      */
     public static double fundamentalFrequency(@NotNull double[] fftResult, int sampleRate) {
         int fftSize = fftResult.length * 2;
@@ -107,7 +109,7 @@ public class FFT {
      * @param index The FFT bin index.
      * @param sampleRate The sample rate of the audio signal.
      * @param fftSize The size of the FFT.
-     * @return The corresponding frequency in Hz.
+     * @return the corresponding frequency in hertz
      */
     public static double indexToFrequency(int index, int sampleRate, int fftSize) {
         return (double) index * sampleRate / fftSize;
@@ -119,23 +121,18 @@ public class FFT {
      * @param frequency The frequency in Hz.
      * @param sampleRate The sample rate of the audio signal.
      * @param fftSize The size of the FFT.
-     * @return The corresponding FFT bin index.
+     * @return the nearest corresponding FFT bin index
      */
     public static int frequencyToIndex(double frequency, int sampleRate, int fftSize) {
         return (int) Math.round(frequency * fftSize / sampleRate);
     }
 
     /**
-     * Computes the magnitude spectrum of the given FFT result.
-     *
-     * @param compute The FFT result.
-     * @return The magnitude spectrum.
-     */
-    /**
-     * Computes the peak (maximum) magnitude from the FFT result.
+     * Computes the normalized peak magnitude from an FFT magnitude spectrum.
      *
      * @param fftMagnitudeResult The magnitude spectrum array from FFT.compute().
-     * @return The maximum magnitude value.
+     * @param originalSampleCount number of time-domain samples used to produce the spectrum
+     * @return the normalized maximum magnitude, or {@code 0.0} for invalid input
      */
     public static double peakMagnitude(
             @NotNull double[] fftMagnitudeResult,
@@ -156,6 +153,15 @@ public class FFT {
         return (2.0 * max) / originalSampleCount;
     }
 
+    /**
+     * Computes the Root Mean Square (RMS) value of the time-domain signal.
+     *
+     * Used to determine if the signal is only silence and should not
+     * be processed, acts as a voice activity detection (VAD)
+     *
+     * @param timeDomainSignal The time-domain signal.
+     * @return the RMS value, or {@code 0.0} when the signal is empty
+     */
     public static double calculateRMS(@NotNull double[] timeDomainSignal) {
         if (timeDomainSignal.length == 0) return 0.0;
 

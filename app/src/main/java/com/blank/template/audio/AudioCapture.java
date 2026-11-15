@@ -7,11 +7,20 @@ import android.media.AudioRecord;
 import androidx.core.app.ActivityCompat;
 import com.blank.template.config.AudioConfig;
 
+/**
+ * AudioCapture class is responsible for recording audio data
+ */
 public class AudioCapture {
     private AudioRecord audioRecord;
 
+    /** Indicates whether audio capture is currently active. */
     public volatile boolean isRecording = false;
 
+    /**
+     * Creates an audio recorder using the application's audio configuration.
+     *
+     * @param context context used to verify microphone permission
+     */
     public AudioCapture(Context context) {
         if (ActivityCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
             return;
@@ -30,6 +39,9 @@ public class AudioCapture {
         }
     }
 
+    /**
+     * Starts recording when the underlying {@link AudioRecord} is initialized.
+     */
     public void startRecording() {
         if (isInitialized()) {
             try {
@@ -41,6 +53,9 @@ public class AudioCapture {
         }
     }
 
+    /**
+     * Stops recording when the underlying {@link AudioRecord} is initialized.
+     */
     public void stopRecording() {
         if (isInitialized()) {
             try {
@@ -52,6 +67,12 @@ public class AudioCapture {
         }
     }
 
+    /**
+     * Reads one chunk of raw PCM audio from the recorder.
+     *
+     * @return the bytes read, or {@code null} when the recorder is unavailable or no
+     *         positive amount of data was read
+     */
     public byte[] readAudioDataChunk() {
         if (isInitialized()) {
             byte[] buffer = new byte[AudioConfig.BUFFER_SIZE];
@@ -65,6 +86,9 @@ public class AudioCapture {
         return null;
     }
 
+    /**
+     * Releases the underlying {@link AudioRecord} resources.
+     */
     public void release() {
         if (audioRecord != null) {
             try {
@@ -76,6 +100,11 @@ public class AudioCapture {
         }
     }
 
+    /**
+     * Checks whether the underlying recorder was created and initialized successfully.
+     *
+     * @return {@code true} when the recorder is ready for capture
+     */
     public boolean isInitialized() {
         return audioRecord != null && audioRecord.getState() == AudioRecord.STATE_INITIALIZED;
     }

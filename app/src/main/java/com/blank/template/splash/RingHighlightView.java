@@ -13,6 +13,9 @@ import android.view.animation.LinearInterpolator;
 
 import androidx.annotation.NonNull;
 
+/**
+ * Utility class for animating the loading ring
+ */
 public class RingHighlightView extends View {
 
     private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -24,21 +27,42 @@ public class RingHighlightView extends View {
     private float centerY;
     private float radius;
 
+    /**
+     * Creates a ring highlight view with the default style.
+     *
+     * @param context the view context
+     */
     public RingHighlightView(Context context) {
         super(context);
         init();
     }
 
+    /**
+     * Creates a ring highlight view using XML attributes.
+     *
+     * @param context the view context
+     * @param attrs the XML attributes used to configure the view
+     */
     public RingHighlightView(Context context, AttributeSet attrs) {
         super(context, attrs);
         init();
     }
 
+    /**
+     * Creates a ring highlight view using XML attributes and a default style.
+     *
+     * @param context the view context
+     * @param attrs the XML attributes used to configure the view
+     * @param defStyleAttr the default style attribute
+     */
     public RingHighlightView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         init();
     }
 
+    /**
+     * Configures the paint used to draw the animated ring.
+     */
     private void init() {
         paint.setStyle(Paint.Style.STROKE);
         paint.setStrokeCap(Paint.Cap.ROUND);
@@ -47,6 +71,14 @@ public class RingHighlightView extends View {
         paint.setStrokeWidth(26f * density);
     }
 
+    /**
+     * Recalculates the ring geometry and gradient when the view size changes.
+     *
+     * @param w the new width in pixels
+     * @param h the new height in pixels
+     * @param oldw the previous width in pixels
+     * @param oldh the previous height in pixels
+     */
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
@@ -88,6 +120,9 @@ public class RingHighlightView extends View {
         paint.setShader(sweepGradient);
     }
 
+    /**
+     * Starts the continuous seven-second rotation animation.
+     */
     public void startAnimation() {
         if (animator != null && animator.isRunning()) {
             return;
@@ -100,6 +135,9 @@ public class RingHighlightView extends View {
         animator.start();
     }
 
+    /**
+     * Stops and clears the ring rotation animation, if it is running.
+     */
     public void stopAnimation() {
         if (animator != null) {
             animator.cancel();
@@ -107,15 +145,30 @@ public class RingHighlightView extends View {
         }
     }
 
+    /**
+     * Updates the angle used to rotate the ring and redraws the view.
+     *
+     * @param angle the rotation angle in degrees
+     */
     public void setRotationAngle(float angle) {
         this.rotationAngle = angle;
         invalidate();
     }
 
+    /**
+     * Returns the current ring rotation angle.
+     *
+     * @return the rotation angle in degrees
+     */
     public float getRotationAngle() {
         return rotationAngle;
     }
 
+    /**
+     * Draws the gradient ring at its current rotation angle.
+     *
+     * @param canvas the canvas on which the ring is drawn
+     */
     @Override
     protected void onDraw(@NonNull Canvas canvas) {
         super.onDraw(canvas);
@@ -127,6 +180,9 @@ public class RingHighlightView extends View {
         canvas.restore();
     }
 
+    /**
+     * Releases the animation when the view is detached from the window.
+     */
     @Override
     protected void onDetachedFromWindow() {
         stopAnimation();
